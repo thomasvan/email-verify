@@ -1,36 +1,42 @@
 let fs = require('fs')
+// const csv = require('fast-csv');
+// const Email = require('../models/email');
 
-module.exports.getAddressFromTextFile = function(filepath) {
-  let file = { 
-    exist: true, 
+module.exports.getAddressFromTextFile = function (filepath) {
+  let file = {
+    exist: true,
     extension: require('path').extname(filepath),
     content: ''
   }
 
-  let extensionErrorMsg = 'Sorry, you needed to put addresses list into plain text (*.txt) file. Separated each address by new line'
+  let extensionErrorMsg = 'Sorry, you needed to put addresses list into csv file. Separated each address by new line'
 
-  if(file.extension !== '.txt') throw new Error(extensionErrorMsg)
+  if (file.extension !== '.csv') throw new Error(extensionErrorMsg)
+  let csvData = [];
 
   try {
-    file.content = fs.readFileSync(filepath, 'utf-8')
-  } 
-  catch (e) {
-    if (e.code === 'ENOENT') console.log('File not found!',e)
+    var data = fs.readFileSync(filepath)
+      .toString() // convert Buffer to string
+      .split('\n') // split string to lines
+      .map(e => e.trim()) // remove white spaces for each line
+      .map(e => e.split(',').map(e => e.trim()));
+
+    for (let i = 1; i < data.length; i++) {
+      csvData.push(data[i][1]);
+    }
+  } catch (e) {
+    if (e.code === 'ENOENT') console.log('File not found!', e)
     else console.log('Error: ', e)
     file.exist = false;
-  } 
-  finally {
-
-    if (!file.exist) {
+  } finally {
+    if (!csvData) {
       console.log('Error, File not found!')
       return []
-    } 
-    else {
-      let addressList = file.content.split('\n'),
-          addressObject = {}
+    } else {
+      let addressObject = {}
 
-      addressList.forEach((address)=>{
-        if(address.length > 0){
+      csvData.forEach((address) => {
+        if (address.length > 0) {
           addressObject[address] = true
         }
       })
