@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+const {
+  convertArrayToCSV
+} = require('convert-array-to-csv');
+let fs = require('fs')
+require('dotenv').config();
+
 let Promise = require('bluebird'),
   verify = Promise.promisify(require('./index.js').verify),
   argv = process.argv.slice(2),
@@ -105,15 +111,29 @@ if (err_msg) {
     logger.info('DEBUG')
     logger.info('OPTIONS: ' + JSON.stringify(options))
   }
+  let count = 0
+  let objectArr = []
   Promise.map(addresses, function (val) {
-
     let individualOptions = Object.assign({
       email: val
     }, options)
 
     return verify(individualOptions)
+      .delay(parseInt(process.env.DELAYTIME * 1000))
       .then((info) => {
-        console.log(info);
+        // count row number
+        count++;
+
+        // create row data
+        var objectData = {
+          '#': count,
+          email: info.addr,
+          is_valid: info.success,
+          raw: JSON.stringify(info)
+        }
+
+        // csv array data
+        objectArr.push(objectData)
       })
       .catch((err) => {
         console.log(err);
@@ -121,5 +141,10 @@ if (err_msg) {
 
   }, {
     concurrency: options.concurrency
+  }).then(() => {
+    const csvFromArrayOfObjects = convertArrayToCSV(objectArr);
+
+    fs.writeFileSync("output.csv", csvFromArrayOfObjects)
+    console.log('Done');
   })
 }

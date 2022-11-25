@@ -1,6 +1,4 @@
 let fs = require('fs')
-// const csv = require('fast-csv');
-// const Email = require('../models/email');
 
 module.exports.getAddressFromTextFile = function (filepath) {
   let file = {
@@ -21,8 +19,15 @@ module.exports.getAddressFromTextFile = function (filepath) {
       .map(e => e.trim()) // remove white spaces for each line
       .map(e => e.split(',').map(e => e.trim()));
 
-    for (let i = 1; i < data.length; i++) {
-      csvData.push(data[i][1]);
+    for (let i = 1; i < data.length; i++) { // from 1 to ignore header row
+      csvData.push(data[i][1]); // get only email property
+      /*
+      example data format
+      [
+        [ 'id', 'email' ],
+        [ '1', 'afeldspar@optonline.net' ],
+      ]
+      */
     }
   } catch (e) {
     if (e.code === 'ENOENT') console.log('File not found!', e)
@@ -41,6 +46,7 @@ module.exports.getAddressFromTextFile = function (filepath) {
         }
       })
 
+      console.log('Start email verification...');
       return Object.keys(addressObject)
     }
 
