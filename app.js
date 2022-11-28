@@ -129,7 +129,6 @@ if (err_msg) {
           '#': count,
           email: info.addr,
           is_valid: info.success,
-          raw: JSON.stringify(info)
         }
 
         // csv array data
