@@ -109,11 +109,12 @@ function startDNSQueries(params) {
   logger.info("Resolving DNS... " + domain)
   dns.resolveMx(domain, (err, addresses) => {
     if (err || (typeof addresses === 'undefined')) {
-      params.callback(err, {
-        success: false,
-        info: 'Domain not found',
-        code: infoCodes.domainNotFound
-      });
+      params.callback(null, {
+        success: 'error',
+        info: 'error',
+        addr: params.email,
+        code: infoCodes.domainNotFound,
+      })
     } else if (addresses && addresses.length <= 0) {
       params.callback(null, {
         success: false,

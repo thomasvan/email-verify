@@ -128,7 +128,7 @@ if (err_msg) {
         var objectData = {
           '#': count,
           email: info.addr,
-          is_valid: info.success,
+          is_valid: (info.success == 'error' ? 'ERROR' : info.success),
         }
 
         // csv array data
