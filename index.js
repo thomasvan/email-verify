@@ -209,9 +209,18 @@ function beginSMTPQueries(params) {
             // Connection Worked
             var cmd = 'MAIL FROM:<' + params.options.sender + '>\r\n'
             logger.client(cmd)
-            socket.write(cmd, function () {
+            socket.write(cmd, function (err) {
               stage++;
               response = '';
+              if (err) {
+                callback(null, {
+                  success: 'error',
+                  info: 'error',
+                  addr: params.email,
+                  code: infoCodes.SMTPConnectionTimeout,
+                  tryagain: tryagain
+                })
+              }
             });
           } else {
             socket.end();
@@ -222,9 +231,18 @@ function beginSMTPQueries(params) {
             // MAIL Worked
             var cmd = 'RCPT TO:<' + params.email + '>\r\n'
             logger.client(cmd)
-            socket.write(cmd, function () {
+            socket.write(cmd, function (err) {
               stage++;
               response = '';
+              if (err) {
+                callback(null, {
+                  success: 'error',
+                  info: 'error',
+                  addr: params.email,
+                  code: infoCodes.SMTPConnectionTimeout,
+                  tryagain: tryagain
+                })
+              }
             });
           } else {
             socket.end();

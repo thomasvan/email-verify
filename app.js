@@ -131,6 +131,8 @@ if (err_msg) {
           is_valid: (info.success == 'error' ? 'ERROR' : info.success),
         }
 
+        console.log('Verify ' + count + ' email');
+
         // csv array data
         objectArr.push(objectData)
       })
