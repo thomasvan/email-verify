@@ -96,6 +96,7 @@ module.exports.verify = function verify(email, options, callback) {
   if (params.options.dns) dnsConfig(params.options)
 
   logger.info("# Veryfing " + params.email)
+  console.log('Verifying ' + params.email);
 
   startDNSQueries(params)
 
@@ -218,7 +219,8 @@ function beginSMTPQueries(params) {
                   info: 'error',
                   addr: params.email,
                   code: infoCodes.SMTPConnectionTimeout,
-                  tryagain: tryagain
+                  tryagain: tryagain,
+                  err:err.code
                 })
               }
             });
@@ -240,7 +242,8 @@ function beginSMTPQueries(params) {
                   info: 'error',
                   addr: params.email,
                   code: infoCodes.SMTPConnectionTimeout,
-                  tryagain: tryagain
+                  tryagain: tryagain,
+                  err:err.code
                 })
               }
             });
@@ -275,13 +278,21 @@ function beginSMTPQueries(params) {
 
   socket.once('error', function (err) {
     logger.error("Connection error")
-    callback(err, {
+    callback(null, {
       success: false,
       info: 'SMTP connection error',
       addr: params.email,
       code: infoCodes.SMTPConnectionError,
-      tryagain: tryagain
+      tryagain: tryagain,
+      err:err.code
     })
+    // callback(err, {
+    //   success: false,
+    //   info: 'SMTP connection error',
+    //   addr: params.email,
+    //   code: infoCodes.SMTPConnectionError,
+    //   tryagain: tryagain
+    // })
   })
 
   socket.once('end', function () {

@@ -1,8 +1,5 @@
 #!/usr/bin/env node
 
-const {
-  convertArrayToCSV
-} = require('convert-array-to-csv');
 let fs = require('fs')
 require('dotenv').config();
 
@@ -112,7 +109,6 @@ if (err_msg) {
     logger.info('OPTIONS: ' + JSON.stringify(options))
   }
   let count = 0
-  let objectArr = []
   Promise.map(addresses, function (val) {
     let individualOptions = Object.assign({
       email: val
@@ -121,20 +117,24 @@ if (err_msg) {
     return verify(individualOptions)
       .delay(parseInt(process.env.DELAYTIME * 1000))
       .then((info) => {
-        // count row number
         count++;
 
-        // create row data
-        var objectData = {
-          '#': count,
-          email: info.addr,
-          is_valid: (info.success == 'error' ? 'ERROR' : info.success),
+        if (count == 1){
+          fs.writeFile('./io-file/output.csv','',function(){})
+          let header = `#,email,is_valid\n`;
+          fs.appendFileSync('./io-file/output.csv', header);
         }
 
-        console.log('Verify ' + count + ' email');
+        var row = `${count},${info.addr},${(info.success == 'error' ? 'ERROR' : info.success)}\n`;
 
-        // csv array data
-        objectArr.push(objectData)
+        try {
+          fs.appendFileSync('./io-file/output.csv', row);
+        } catch (err) {
+          console.error(err);
+        }
+
+        console.log(info);
+        console.log('Verified ' + count +' email\n');
       })
       .catch((err) => {
         console.log(err);
@@ -143,9 +143,6 @@ if (err_msg) {
   }, {
     concurrency: options.concurrency
   }).then(() => {
-    const csvFromArrayOfObjects = convertArrayToCSV(objectArr);
-
-    fs.writeFileSync("output.csv", csvFromArrayOfObjects)
     console.log('Done');
   })
 }

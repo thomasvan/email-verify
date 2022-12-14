@@ -1,5 +1,14 @@
 let fs = require('fs')
 
+function isEmail(email) {
+  var emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+  if (email !== '' && email.match(emailFormat)) {
+    return true;
+  }
+
+  return false;
+}
+
 module.exports.getAddressFromTextFile = function (filepath) {
   let file = {
     exist: true,
@@ -13,22 +22,19 @@ module.exports.getAddressFromTextFile = function (filepath) {
   let csvData = [];
 
   try {
-    var data = fs.readFileSync(filepath)
+    var data = fs.readFileSync('./io-file/' + filepath)
       .toString() // convert Buffer to string
       .split('\n') // split string to lines
       .map(e => e.trim()) // remove white spaces for each line
       .map(e => e.split(',').map(e => e.trim()));
 
-    for (let i = 1; i < data.length; i++) { // from 1 to ignore header row
-      csvData.push(data[i][1]); // get only email property
-      /*
-      example data format
-      [
-        [ 'id', 'email' ],
-        [ '1', 'afeldspar@optonline.net' ],
-      ]
-      */
-    }
+    data.forEach(element => {
+      element.forEach(rowData => {
+        if (isEmail(rowData)) {
+          csvData.push(rowData)
+        }
+      });
+    });
   } catch (e) {
     if (e.code === 'ENOENT') console.log('File not found!', e)
     else console.log('Error: ', e)
@@ -49,6 +55,5 @@ module.exports.getAddressFromTextFile = function (filepath) {
       console.log('Start email verification...');
       return Object.keys(addressObject)
     }
-
   }
 }
